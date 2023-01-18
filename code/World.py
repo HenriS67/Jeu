@@ -5,6 +5,7 @@ from settings import *
 from tile import Tile 
 from player import Player
 from debug import debug
+from weapon import *
 class World:
     def __init__(self):
         #get the display surface
@@ -13,6 +14,8 @@ class World:
         self.visible_sprites = YSortCameraGroup()
         self.obstacles_sprites = pygame.sprite.Group()
     
+        # attack sprites
+        self.current_attack = None 
         # sprite setup
         self.create_map()
     
@@ -41,8 +44,15 @@ class World:
                             surf = graphics['objects'][int(col)]
                             Tile((x,y),[self.visible_sprites,self.obstacles_sprites],'object',surf)
 
-        self.player = Player((2000,1430),[self.visible_sprites],self.obstacles_sprites)  
-                   
+        self.player = Player((2000,1430),[self.visible_sprites],self.obstacles_sprites,self.create_attack,self.destroy_attack)  
+ 
+    def create_attack(self):
+        self.current_attack=Weapon(self.player,[self.visible_sprites])
+        
+    def destroy_attack(self):
+        if self.current_attack:
+            self.current_attack.kill()   
+        self.current_attack = None      
     def run(self):
         #update and draw the game
         self.visible_sprites.custom_draw(self.player)
