@@ -6,6 +6,8 @@ from tile import Tile
 from player import Player
 from debug import debug
 from weapon import *
+from UI import *
+
 class World:
     def __init__(self):
         #get the display surface
@@ -18,6 +20,9 @@ class World:
         self.current_attack = None 
         # sprite setup
         self.create_map()
+        
+        #UI
+        self.ui=UI()
     
     def create_map(self):
         layouts = {
@@ -50,6 +55,7 @@ class World:
         self.current_attack=Weapon(self.player,[self.visible_sprites])
         
     def destroy_attack(self):
+        
         if self.current_attack:
             self.current_attack.kill()   
         self.current_attack = None      
@@ -57,7 +63,7 @@ class World:
         #update and draw the game
         self.visible_sprites.custom_draw(self.player)
         self.visible_sprites.update()
-        debug(self.player.status)
+        self.ui.display(self.player)
         
         
         
