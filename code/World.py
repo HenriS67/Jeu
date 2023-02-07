@@ -10,10 +10,12 @@ from UI import *
 from enemy import Enemy
 from particles import AnimationPlayer
 from magic import MagicPlayer
+from upgrade import Upgrade
 class World:
     def __init__(self):
         #get the display surface
         self.display_surface = pygame.display.get_surface()
+        self.game_paused=False
         #sprite group setup
         self.visible_sprites = YSortCameraGroup()
         self.obstacles_sprites = pygame.sprite.Group()
@@ -28,6 +30,7 @@ class World:
         
         #UI
         self.ui=UI()
+        self.upgrade=Upgrade(self.player)
         
         #particles
         self.animation_player = AnimationPlayer()
@@ -80,7 +83,8 @@ class World:
                                       (x,y),[self.visible_sprites,self.attackable_sprites],
                                       self.obstacles_sprites,
                                       self.damage_player,
-                                      self.trigger_death_particles)
+                                      self.trigger_death_particles,
+                                      self.add_xp)
                                 
 
  
@@ -127,14 +131,23 @@ class World:
             self.animation_player.create_particles(attack_type,self.player.rect.center,[self.visible_sprites])
     def trigger_death_particles(self, pos, particle_type):
         self.animation_player.create_particles(particle_type,pos,self.visible_sprites)
-         
+       
+    def add_xp(self,amount):
+        self.player.exp += amount  
+    
+    def toggle_menu(self):
+        self.game_paused = not self.game_paused  
     def run(self):
         #update and draw the game
         self.visible_sprites.custom_draw(self.player)
-        self.visible_sprites.update()
-        self.visible_sprites.enemy_update(self.player)
-        self.player_attack_logic()
         self.ui.display(self.player)
+        if not self.game_paused:
+            self.visible_sprites.update()
+            self.visible_sprites.enemy_update(self.player)
+            self.player_attack_logic()
+        else:
+            self.upgrade.display()
+            
         
         
         
