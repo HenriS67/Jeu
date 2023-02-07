@@ -8,6 +8,7 @@ from debug import debug
 from weapon import *
 from UI import *
 from enemy import Enemy
+from particles import AnimationPlayer
 
 class World:
     def __init__(self):
@@ -27,6 +28,9 @@ class World:
         
         #UI
         self.ui=UI()
+        
+        #particles
+        self.animation_player = AnimationPlayer()
     
     def create_map(self):
         layouts = {
@@ -74,7 +78,8 @@ class World:
                                 Enemy(monster_name,
                                       (x,y),[self.visible_sprites,self.attackable_sprites],
                                       self.obstacles_sprites,
-                                      self.damage_player)
+                                      self.damage_player,
+                                      self.trigger_death_particles)
                                 
 
  
@@ -98,6 +103,10 @@ class World:
                 if collision_sprites:
                     for target_sprite in collision_sprites:
                         if target_sprite.sprite_type =='grass':
+                            pos = target_sprite.rect.center
+                            offset = pygame.math.Vector2(0,75)
+                            for leaf in range(random.randint(3,6)):
+                                self.animation_player.create_grass_particles(pos - offset,[self.visible_sprites])
                             target_sprite.kill()
                         elif target_sprite.sprite_type=='enemy':
                             target_sprite.get_damage(self.player,attack_sprite.sprite_type)
@@ -108,6 +117,11 @@ class World:
             self.player.vulnerable = False
             self.player.hurt_time = pygame.time.get_ticks()
             
+            #spawn particles
+            self.animation_player.create_particles(attack_type,self.player.rect.center,[self.visible_sprites])
+    def trigger_death_particles(self, pos, particle_type):
+        self.animation_player.create_particles(particle_type,pos,self.visible_sprites)
+         
     def run(self):
         #update and draw the game
         self.visible_sprites.custom_draw(self.player)
