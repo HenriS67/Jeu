@@ -15,17 +15,8 @@ class Game:
 		#sound
 		#Instantiate mixer
 		mixer.init()
-
-		#Load audio file
-		mixer.music.load('audio/Tundra.mp3')
-
-		print("music started playing....")
-
-		#Set preferred volume
-		mixer.music.set_volume(0.2)
-
-		#Play the music
-		mixer.music.play()
+		music = pygame.mixer.music.load('audio/main.ogg')
+		pygame.mixer.music.play(loops=-1)
   
 	def run(self):
 		while True:
