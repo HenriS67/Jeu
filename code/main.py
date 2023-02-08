@@ -16,7 +16,9 @@ class Game:
 		#Instantiate mixer
 		mixer.init()
 		music = pygame.mixer.music.load('audio/main.ogg')
+		pygame.mixer.music.set_volume(0.1)
 		pygame.mixer.music.play(loops=-1)
+  		
   
 	def run(self):
 		while True:

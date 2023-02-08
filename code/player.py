@@ -8,7 +8,9 @@ class Player(Entity):
         super().__init__(groups)
         self.image = pygame.image.load('graphics/test/player.png').convert_alpha()
         self.rect = self.image.get_rect(topleft=pos)
+        print(self.rect)
         self.hitbox=self.rect.inflate(-6,HITBOX_OFFSET['player'])
+        print(self.hitbox)
         #graphics setup
         self.import_player_assets()
         self.status='down'
@@ -50,7 +52,7 @@ class Player(Entity):
         self.invulnerability_duration = 500
         
         self.weapon_attack_sound = pygame.mixer.Sound('audio/sword.wav')
-        self.weapon_attack_sound.set_volume(0.4)
+        self.weapon_attack_sound.set_volume(0.1)
                 
     def import_player_assets(self):
         character_path = 'graphics/player/'

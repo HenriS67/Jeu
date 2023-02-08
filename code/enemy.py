@@ -14,7 +14,6 @@ class Enemy(Entity):
         self.import_graphics(monster_name)
         self.status = 'idle'
         self.image=self.animations[self.status][self.frame_index]
-        
         #movement
         self.rect = self.image.get_rect(topleft = pos)
         self.hitbox=self.rect.inflate(0,-10)
@@ -47,12 +46,12 @@ class Enemy(Entity):
         #sounds
         self.death_sound= pygame.mixer.Sound('audio/death.wav')
         self.hit_sound= pygame.mixer.Sound('audio/hit.wav')
-        self.death_sound.set_volume(0.2)
-        self.hit_sound.set_volume(0.2)
+        self.death_sound.set_volume(0.1)
+        self.hit_sound.set_volume(0.1)
         
         
         self.attack_sound= pygame.mixer.Sound(monster_info['attack_sound'])
-        self.attack_sound.set_volume(0.2)
+        self.attack_sound.set_volume(0.1)
         
     def actions(self,player):
         if self.status == 'attack':
