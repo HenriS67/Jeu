@@ -21,7 +21,7 @@ class World:
         #sprite group setup
         self.visible_sprites = YSortCameraGroup()
         self.obstacles_sprites = pygame.sprite.Group()
-    
+        self.floor_sprites = YSortCameraGroup()
         # attack sprites
         self.current_attack = None 
         self.attack_sprites = pygame.sprite.Group()
@@ -38,107 +38,62 @@ class World:
         self.magic_player = MagicPlayer(self.animation_player)
     
     def create_map(self):
+        
         tmx_data = load_pygame('map/test.tmx')
-        #for layer in tmx_data.visible_layers:
-         #   print(layer)
-        #print(tmx_data.layernames)
-        #print(tmx_data.get_layer_by_name('ground'))
-        print('test')
-        for obj in tmx_data.objectgroups:
-            print(obj)
         
-        #get_tiles
+        #floor
         layer =  tmx_data.get_layer_by_name('ground')
-        #for x,y,surf in layer.tiles():
-            #print(x * TILESIZE)
-            #print(y * TILESIZE)
-            #print(surf)
-            
-        #print(layer.data)
-        #print(layer.name)
-        #print(layer.id)
-        
-        # get obects
-        object_layer = tmx_data.get_layer_by_name('obj')
-        for ob in object_layer:
-            if ob.type == 'ptn':
-                print(ob.x)
-                print(ob.y)
-                print(ob.image)
-            
-        
-        
-        
-        layouts = {
-            'boundary': import_csv_layout('map/map_FloorBlocks.csv'),
-            'grass': import_csv_layout('map/map_Grass.csv'),
-            'object': import_csv_layout('map/map_LargeObjects.csv'),
-            'entities': import_csv_layout('map/map_Entities.csv')
-        }
-        graphics = {
-            'grass': import_folder('graphics/Grass'),
-            'objects': import_folder('graphics/objects')
-        }
-        
-        for layer.name in ('ground' , 'test'):
+        for layer.name in ('ground'):
             for x,y,surf in layer.tiles():
+                Tile((x*TILESIZE,y*TILESIZE),
+                    [self.floor_sprites,],
+                    'ground',surf)
+          
+        #boundaries        
+        boundaries_layer =  tmx_data.get_layer_by_name('boundaries')
+        for boundaries_layer.name in ('boudaries'):
+            for x,y,surf in boundaries_layer.tiles():
+                Tile((x*TILESIZE,y*TILESIZE),[self.obstacles_sprites],'invisible')
+            
+        #grass       
+        layer_grass =  tmx_data.get_layer_by_name('grass')
+        for layer_grass.name in ('grass'):
+            for x,y,surf in layer_grass.tiles():
+                Tile((x*TILESIZE,y*TILESIZE),
+                        [self.visible_sprites,
+                            self.obstacles_sprites,
+                            self.attackable_sprites],
+                        'grass',surf)
                 
-                Tile((x,y),
-                    [self.visible_sprites,
-                        self.obstacles_sprites,
-                        self.attackable_sprites],
-                    'grass',surf)
-                
-        self.player = Player(
-                                    (0,0),
-                                    [self.visible_sprites],
-                                    self.obstacles_sprites,
-                                    self.create_attack,
-                                    self.destroy_attack,
-                                    self.create_magic) 
-                
-        """    
-        for style,layout in layouts.items():
-            for row_index,row in enumerate(layout):
-                for col_index,col in enumerate(row):
-                    if(col != '-1'):
-                        x = col_index * TILESIZE
-                        y = row_index * TILESIZE
-                        if style == 'boundary':
-                            Tile((x,y),[self.obstacles_sprites],'invisible')
-                        if style == 'grass':
-                            random_grass_image=random.choice(graphics['grass'])
-                            Tile((x,y),
-                                 [self.visible_sprites,
-                                        self.obstacles_sprites,
-                                        self.attackable_sprites],
-                                 'grass',random_grass_image)
-                        if style =='object':
-                            surf = graphics['objects'][int(col)]
-                            Tile((x,y),[self.visible_sprites,self.obstacles_sprites],'object',surf)
-                        if style =='entities':
-                            if col == '394':
-                                self.player = Player(
-                                    (x,y),
-                                    [self.visible_sprites],
-                                    self.obstacles_sprites,
-                                    self.create_attack,
-                                    self.destroy_attack,
-                                    self.create_magic) 
-                            else:
-                                if col == '390' : monster_name = 'bamboo'
-                                elif col == '391' : monster_name = 'spirit'
-                                elif col == '392' : monster_name = 'raccoon'
-                                elif col == '393' : monster_name = 'squid'
-                                Enemy(monster_name,
-                                      (x,y),[self.visible_sprites,self.attackable_sprites],
-                                      self.obstacles_sprites,
-                                      self.damage_player,
-                                      self.trigger_death_particles,
-                                      self.add_xp)
-              """                  
+        #enemy & player
+        object_layer = tmx_data.get_layer_by_name('obj')     
+        for ob in object_layer:
+            if ob.type == 'enemy':
+                print('test')
+                Enemy(ob.name,
+                    (int(ob.x),int(ob.y)),[self.visible_sprites,self.attackable_sprites],
+                    self.obstacles_sprites,
+                    self.damage_player,
+                    self.trigger_death_particles,
+                    self.add_xp)
+            elif ob.type == 'player':
+                self.player = Player(
+                    (int(ob.x),int(ob.y)),
+                    [self.visible_sprites],
+                    self.obstacles_sprites,
+                    self.create_attack,
+                    self.destroy_attack,
+                    self.create_magic)   
+                  
+        #obstacles entitys          
+        obstacle_layer = tmx_data.get_layer_by_name('obs')        
+        for ob in obstacle_layer:
+                Tile((int(ob.x),int(ob.y)),
+                     [self.visible_sprites,
+                      self.obstacles_sprites],
+                     'object',
+                     ob.image)
 
- 
     def create_attack(self):
         self.current_attack=Weapon(self.player,[self.visible_sprites,self.attack_sprites])
         
@@ -188,8 +143,10 @@ class World:
     
     def toggle_menu(self):
         self.game_paused = not self.game_paused  
+        
     def run(self):
         #update and draw the game
+        self.floor_sprites.custom_draw(self.player)
         self.visible_sprites.custom_draw(self.player)
         self.ui.display(self.player)
         if not self.game_paused:
@@ -212,18 +169,17 @@ class YSortCameraGroup(pygame.sprite.Group):
         self.offset = pygame.math.Vector2(100,200)
         
         #creating the floor
-        self.floor_surf = pygame.image.load('graphics/tilemap/ground.png').convert()
-        self.floor_rect = self.floor_surf.get_rect(topleft=(0,0))
+        #self.floor_surf = pygame.image.load('graphics/tilemap/ground.png').convert()
+        #self.floor_rect = self.floor_surf.get_rect(topleft=(0,0))
         
     def custom_draw(self,player):
-        
         #offset
         self.offset.x=player.rect.centerx - self.half_width
         self.offset.y=player.rect.centery - self.half_height
         
         #drawing the floor
-        floor_offset_pos = self.floor_rect.topleft - self.offset
-        self.display_surface.blit(self.floor_surf,floor_offset_pos)
+        #floor_offset_pos = self.floor_rect.topleft - self.offset
+        #self.display_surface.blit(self.floor_surf,floor_offset_pos)
         
         #for sprite in self.sprites():
         for sprite in sorted(self.sprites(),key = lambda sprite: sprite.rect.centery):

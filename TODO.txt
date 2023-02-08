@@ -1,5 +1,5 @@
 - pixel art, voir tuto
-- voir comment utiliser TILE
+- voir comment utiliser TILE => done
 - voir comment changer dimensions des perso, ennemis => hitbox lié à l'image, rien à faire
 - voir comment itnégrer mecaniques de pokémons (batiments...)
 - faire du reverse engeneering
